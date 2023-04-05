@@ -1,0 +1,6 @@
+.idea
+output/
+project/runs/*.vtu
+project/runs/*.SUM
+project/runs/*.MVS
+project/runs/*.pvd
