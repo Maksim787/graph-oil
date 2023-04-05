@@ -4,3 +4,5 @@ project/runs/*.vtu
 project/runs/*.SUM
 project/runs/*.MVS
 project/runs/*.pvd
+project/runs/*.CSV
+project/runs/*.pvsm
