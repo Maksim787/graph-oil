@@ -1,2 +1,9 @@
-run_file: SPE1
+run_file: OW2P-RT
 project_path: D:\Learning\3_course\Sirius (Energy)\Sirius Graph Project\graph-oil\
+tmp_suffixes:
+  - .vtu
+  - .SUM
+  - .MVS
+  - .pvd
+  - .CSV
+  - .pvsm

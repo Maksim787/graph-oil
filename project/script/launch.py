@@ -16,8 +16,10 @@ def main():
     with open('config.yaml') as f:
         config = yaml.safe_load(f)
     project_path = Path(config['project_path'])
-    binary_path = project_path / 'bin/H64.EXE'
     run_file = config['run_file']
+    tmp_suffixes = config['tmp_suffixes']
+
+    binary_path = project_path / 'bin/H64.EXE'
 
     # Check paths
     assert project_path.exists()  # binary exists
@@ -38,21 +40,22 @@ def main():
     output_directory.mkdir(exist_ok=True)
     assert output_directory.exists()
 
+    # Delete output/*
+    for file in output_directory.iterdir():
+        file.unlink()
+
+    # Delete runs/* which do contain temp tmp_suffixes
+    for file in runs_folder.iterdir():
+        for suffix in tmp_suffixes:
+            if file.name.endswith(suffix):
+                file.unlink()
+
     # Replace .pvsm file paths
     with open(style_path, 'r') as f:
         content = f.read()
     content = content.replace(rf'F:\SIMULATIONS\TESTING\{run_file}', str(runs_folder))
     with open(runs_folder / styles_file, 'w') as f:
         f.write(content)
-
-    # Delete output/*
-    for file in output_directory.iterdir():
-        file.unlink()
-
-    # Delete runs/* which does not end with .run and .pvsm
-    for file in runs_folder.iterdir():
-        if '.' in file.name and not file.name.endswith('.pvsm'):
-            file.unlink()
 
     # Execute simulation
     execute_command(f'"{binary_path}" "{run_path}"', working_directory=runs_folder)

@@ -1,0 +1,379 @@
+
+    Last update on 16.12.2015
+    Program Version: 2015.G03
+
+RUNSPEC   ################### RUNSPEC section begins here ######################
+
+BLACKOIL  ^^^^^^ We switch the program to the BLACKOIL EOS module ^^^^^^^^^^^^^^
+
+                                        We enable:
+WATER                                   - water phase;
+OIL                                     - oil phase.
+
+ROCKCOMP                                We enable rock compaction.
+CAPPRES                                 We enable capillary pressure.
+ENDSCALE                                We enable end-points scaling option.
+/
+
+METRIC    ^^^^^^^^^^^^^^^^^^^^ We use METRIC units ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+START                                   The start date is 1 Jan 1990
+  1  JAN  1990 /
+
+FAST                                    We use FAST option.
+
+GRID      ##################### GRID section begins here #######################
+
+          The grid is specified within brackets MAKE-ENDMAKE
+MAKE      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   CORNER 13 20 38 /                    We specify the number of grid blocks
+                                        along every axis.
+
+INCLUDE                                 We load grid file.
+ 'OW2P-RT.GRDECL' /
+
+GETWELLS                                We import well specs from section
+                                        SCHEDULE.
+
+ENDMAKE   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+INCLUDE                                 We load Net-to-gross ratio.
+ 'OW2P-RT.NTG'/
+INCLUDE                                 We load porosity.
+ 'OW2P-RT.PORO' /
+
+INCLUDE                                 We load X-direction permeability.
+ 'OW2P-RT.PERMX' /
+INCLUDE                                 We load Y-direction permeability.
+ 'OW2P-RT.PERMY' /
+INCLUDE                                 We load Z-direction permeability.
+ 'OW2P-RT.PERMZ' /
+
+ADD                                     We specify permeability in the
+  PERMX   50     4*   38  38   /        layer 4.
+  PERMY   50     4*   38  38   /
+/
+
+MULTIPLY
+  MULTZ   0     4*   15  15   /         Barrier between layer 1 and 2.
+  MULTZ   0     4*   24  24   /         Barrier between layer 2 and 3.
+  MULTZ   0     4*   37  37   /         Barrier between layer 3 and 4.
+/
+
+--EQUALS
+--   MULTPV 999999.0    1 13    1  1 /  Uncomment this keyword if you want to
+--   MULTPV 999999.0    1 13   20 20 /  model fluid influx into the domain
+--   MULTPV 999999.0    1  1    2 19 /  through the lateral boundaries. We
+--   MULTPV 999999.0   13 13    2 19 /  multiply the pore volume of all lateral
+--/                                     grid blocks by factor 999999.0.
+
+^^^^^^^^^^^^^^^ Regions must be specied in section GRID ^^^^^^^^^^^^^^^^^^^^^^^^
+
+EQUALS
+ FIPNUM   1 /                           Regions in layer 1.
+ ROCKNUM  1 /
+ SATNUM   1 /
+/
+
+BOX
+ 4*   16  24  /                         Regions in layer 2.
+ADD
+ FIPNUM   1 /
+ ROCKNUM  1 /
+ SATNUM   1 /
+/
+ENDBOX
+
+BOX
+ 4*   25  37  /                         Regions in layer 3.
+ADD
+ FIPNUM   2 /
+ ROCKNUM  2 /
+ SATNUM   2 /
+/
+ENDBOX
+
+
+BOX
+ 4*   38  38  /                         Regions in layer 4.
+ADD
+ FIPNUM   3 /
+ ROCKNUM  2 /
+ SATNUM   3 /
+/
+ENDBOX
+
+INCLUDE                                 We import equilibration regions
+  'OW2P-RT.EQLNUM' /
+
+INCLUDE                                 We modify saturation functions regions
+  'ADDSATNUM.INC' /                     to provide a better fit to history.
+
+------------------------------------------------------------------------------------
+
+RPTGRID
+  PORO NTG PERMX PERMY PERMZ SATNUM
+  EQLNUM ROCKNUM /                      We report these properties from section
+                                        GRID.
+
+
+PROPS     ####################### PROPS section begins here ####################
+
+          Rock properties are specified within brackets ROCK-ENDROCK
+ROCK      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  1 /
+ROCKTAB
+  43   0.9884      1 /                  We specify rock properties in
+ 143   0.9942      1 /                  layer 1 (ROCKNUM=1).
+ 243   1.0000      1 /
+ 443   1.0116     95 /
+/
+
+ENDROCK   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+ROCK      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   2 /
+ROCKTAB
+  43   0.9884      1 /                  We specify rock properties in
+ 143   0.9942      1 /                  layer 2 (ROCKNUM=2).
+ 243   1.0000      1 /
+ 443   1.0116    100 /
+/
+ENDROCK   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+ROCK      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   3 /
+ROCKTAB
+  43   0.9884      1 /                  We specify rock properties in
+ 143   0.9942      1 /                  layer 3 (ROCKNUM=3).
+ 243   1.0000      1 /
+ 443   1.0116     30 /
+/
+ENDROCK   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+SATOPT                                  Piecewise linear capillary pressure.
+  10* 1 /
+
+          The saturation functions are specified within brackets SAT-ENDSAT
+SAT       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   1 /
+SWOF
+-- layer 1
+ 0.0000    0.0000  0.36200  12.000 /
+ 0.0686    0.0080  0.23526  3.3840 /    We specify saturation functions in
+ 0.1393    0.0259  0.11401  1.8000 /    layer 1 (SATNUM=1).
+ 0.2107    0.0517  0.05600  1.2960 /
+ 0.2814    0.0842  0.03262  1.0440 /
+ 0.3514    0.1231  0.02242  0.9600 /
+ 0.4200    0.1678  0.01465  0.8880 /
+ 0.4900    0.2181  0.00750  0.8640 /
+ 0.5579    0.2737  0.00340  0.7920 /
+ 0.6286    0.3344  0.00061  0.7560 /
+ 0.7000    0.4000  0.00000  0.6120 /
+ 1.0000    1.0000  0.00000  0.0000 /
+/
+ENDSAT    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+SAT       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   2 /
+SWOF
+-- layer2
+ 0.0000    0.0000  0.36200  12.000 /
+ 0.0686    0.0080  0.23526  4.7160 /    We specify saturation functions in
+ 0.1393    0.0259  0.11401  3.0840 /    layer 2 (SATNUM=2).
+ 0.2107    0.0517  0.05600  2.3400 /
+ 0.2814    0.0842  0.03262  1.7040 /
+ 0.3514    0.1231  0.02242  1.3774 /
+ 0.4200    0.1678  0.01465  1.1400 /
+ 0.4900    0.2181  0.00750  0.9240 /
+ 0.5579    0.2737  0.00340  0.7440 /
+ 0.6286    0.3344  0.00061  0.6720 /
+ 0.7000    0.4000  0.00000  0.6000 /
+ 1.0000    1.0000  0.00000  0.0000 /
+/
+ENDSAT    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+SAT       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   3 /
+SWOF
+-- layer 3
+ 0.0000    0.0000  0.36200  12.000 /
+ 0.0686    0.0080  0.23526  3.0240 /    We specify saturation functions in
+ 0.1393    0.0259  0.11401  1.9200 /    layer 3 (SATNUM=3).
+ 0.2107    0.0517  0.05600  1.3320 /
+ 0.2814    0.0842  0.03262  1.1160 /
+ 0.3514    0.1231  0.02242  0.9960 /
+ 0.4200    0.1678  0.01465  0.9000 /
+ 0.4900    0.2181  0.00750  0.7800 /
+ 0.5579    0.2737  0.00340  0.7200 /
+ 0.6286    0.3344  0.00061  0.6840 /
+ 0.7000    0.4000  0.00000  0.5760 /
+ 1.0000    1.0000  0.00000  0.0000 /
+/
+ENDSAT    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+SAT       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   4 /
+SWOF
+ 0.0000    0.0000  10.000  0.1000 /
+ 0.0686    0.0080  9.0200  0.0931 /     We specify saturation functions in
+ 0.1393    0.0259  8.0100  0.0861 /     near well fractured zone.
+ 0.2107    0.0517  6.9900  0.0789 /
+ 0.2814    0.0842  5.9800  0.0719 /
+ 0.3514    0.1231  4.9800  0.0649 /
+ 0.4200    0.1678  4.0000  0.0580 /
+ 0.4900    0.2181  3.0000  0.0510 /
+ 0.5579    0.2737  2.0300  0.0442 /
+ 0.6286    0.3344  1.0200  0.0371 /
+ 0.7000    0.4000  0.0000  0.0300 /
+ 1.0000    1.0000  0.0000  0.0000 /
+/
+ENDSAT    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+          The fluid properties are specified within brackets EOS-ENDEOS
+EOS       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   /
+
+PVCDO
+--  refpres   boil    compro   visoil   viscoo
+      243    1.400  0.0001369   1.13     0.003 /
+/
+
+PVTW
+--  refpres   bwat    comprw   viswat   viscow
+     243      1.0     0.00003   0.32       0  /
+
+
+DENSITY
+-- Oil      Water        Gas
+   822      1000         1* /
+
+ENDEOS    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+INCLUDE                                 We load water critical saturation.
+ 'OW2P-RT.SWCR' /
+
+COPY                                    We copy critical water saturation in
+   SWCR  SWL  /                         the water connate saturation.
+/
+
+INCLUDE                                 We load water relative permeability
+ 'OW2P-RT.KRW' /                        vertical end-points.
+
+EQUALS                                  The maximal water saturation is 1.0.
+ SWU   1.0 /
+/
+
+INCLUDE                                 We load oil critical saturation.
+ 'OW2P-RT.SOWCR' /
+
+INCLUDE                                 We modify oil critical saturation to
+ 'ADDSOWCR.INC' /                       to provide a better history match.
+
+INCLUDE                                 We load initial water saturation.
+  'OW2P-RT.SWATINIT' /
+
+INIT      ####################### INIT section begins here #####################
+
+          The initial equilibrium is specified within brackets EQL-ENDEQL
+EQL       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   1 /                                  We specify initial equilibrium
+EQUIL                                   in region EQLNUM=1.
+  2360     243     2370  /
+ENDEQL    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+EQL       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   2 /                                  We specify initial equilibrium
+EQUIL                                   in region EQLNUM=2.
+  2360     243     2380  /
+ENDEQL    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+EQL       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   3 /                                  We specify initial equilibrium
+EQUIL                                   in region EQLNUM=3.
+  2360     243     2380  /
+ENDEQL    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+EQL       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   4 /                                  Only water in region EQLNUM=4
+EQUIL                                   (layer 4+).
+  2360     243     2000 /
+ENDEQL    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+RPTSUM
+  PRES SWAT SOIL DOIL DWAT
+  VISOIL VISWAT /
+RPTWELL
+  WBHP  WOPR WWPR WWCT WOPT WWPT
+  WEFAC WWIR WWIT WLPR WLPT  /
+RPTFIELD
+  FOE  FOPR FWPR FWCT FOPT FWPT
+  FOIP FWIR FWIT FLPR FLPT /            We save these properties at every
+                                        report step.
+
+RPTSUM
+  SWL SWCR SWU KRW SOWCR PCW
+  SOWL SOWU KRO KROW
+  SWLPC SWUPC
+  EQLNUM SWATINIT NTG CELLVOL
+  I-IJKRES J-IJKRES K-IJKRES /          We save these properties only at the
+                                        first report step.
+
+SCHEDULE   #################### SCHEDULE section begins here ####################
+
+RPTSUM
+  DELETE
+  SWL SWCR SWU KRW SOWCR PCW
+  SOWL SOWU KRO KROW
+  SWLPC SWUPC
+  EQLNUM SWATINIT NTG CELLVOL
+  I-IJKRES J-IJKRES K-IJKRES /          We delete these properties from the
+RPTSUM                                  report list,
+  INSERT K-IJKRES /                     and add this property back.
+
+WEEKTOL                                 We use WEEKTOL option.
+
+WBHPRATE                                Some setups for wells.
+  '*' 2500 /
+/
+
+VARS                                    We specify that
+  PRES DMAX 50  /                       - maximal pressure alteration is 50 bars;
+  PRES MINV 5   /                       - minimal pressure is 5 bar;
+  PRES MAXV 450 /                       - maximal pressure in simulation is
+/                                         450 bars.
+
+ILUTFILL                                Some linear solver setups.
+   5.0 /
+ILUTDROP
+   1E-3 /
+
+REPORTS                                 No reports in log file.
+   NOTHING /
+
+TUNING                                  Next time step is limited to 0.1 days.
+  0.1  32  0.2 /                        Maximal time step is 32 days.
+
+INCLUDE                                 We read production history from
+   'OW2P-RT.SCHEDULE' /                 include file.
+
+POST      ####################### POST section begins here #####################
+
+CONVERT                                 We convert the output to ParaView
+                                        compatible format.
+
+RPTPOST
+  TIME FOE  FOPR FWPR FWCT FOPT
+       FWPT FOIP FWIR FWIT FLPR FLPT /  We save consolidated time series report
+POSTFLD                                 for field rates
+/
+
+RPTPOST
+ NOTHING TIME WBHP WOPR WWPR WWCT
+ WOPT WWPT WEFAC WWIR WWIT WLPR WLPT /  We save consolidated series report for
+POSTWELL                                wells.
+  '*' /
+/
+
+END       ######################################################################
+
