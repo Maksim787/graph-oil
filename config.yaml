@@ -1,0 +1,19 @@
+# path to graph-oil
+project_path: D:\Learning\3_course\Sirius (Energy)\Sirius Graph Project\graph-oil\
+
+# folders in graph-oil
+binary_path: bin/H64.EXE
+
+# folders in project
+sources_folder: sources/  # sources folder
+output_folder: output/  # results CSV files folder
+run_folder: run/  # working directory
+
+# run name
+run_file: OW2P-RT
+include_files:
+  - ADDSATNUM.INC
+  - ADDSOWCR.INC
+#run_file: SPE1
+#run_file: SPE2
+#include_files: []
