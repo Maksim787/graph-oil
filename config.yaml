@@ -8,6 +8,7 @@ binary_path: bin/H64.EXE
 sources_folder: sources/  # sources folder
 output_folder: output/  # results CSV files folder
 run_folder: run/  # working directory
+data_folder: data/  # result features folder
 
 # run name
 run_file: OW2P-RT
