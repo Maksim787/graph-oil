@@ -1,4 +1,6 @@
 import sys
+import time
+
 import yaml
 import subprocess
 import shutil
@@ -320,8 +322,10 @@ def run_simulation(n_periods: int, iteration: int):
 
 def main(start_iteration, n_iterations, n_periods):
     for i in range(start_iteration, start_iteration + n_iterations):
+        start = time.time()
         run_simulation(n_periods=n_periods, iteration=i)
+        print(f'Time: {time.time() - start} seconds')
 
 
 if __name__ == '__main__':
-    main(start_iteration=0, n_iterations=10, n_periods=6)
+    main(start_iteration=110, n_iterations=1000, n_periods=6)
