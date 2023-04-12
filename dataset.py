@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 def create_dataset(data_folder: Path):
     assert data_folder.exists(), data_folder
-    wells = [_well_name(n) for n in range(1, 10)]
+    wells = [_well_name(n) for n in range(10)]
     features_columns = ['oilrate', 'watrate', 'gasrate']
 
     features_by_iteration = []
@@ -31,7 +31,7 @@ def create_dataset(data_folder: Path):
             group_df = features_df.loc[group_ind]
             features_for_date = []
             for well in wells:
-                well_features = group_df[group_df['well'] == f"'WELL{well}'"]
+                well_features = group_df[group_df['well'] == f"'{well}'"]
                 if len(well_features) > 0:
                     assert len(well_features) == 1
                     features_for_date.append(well_features.iloc[0][features_columns].values.squeeze().astype(float))
@@ -42,7 +42,7 @@ def create_dataset(data_folder: Path):
         # read targets
         targets_for_iteration = []
         for well in wells:
-            well_df = pd.read_csv(iteration_folder / f'OW2P-RT.WELL.WELL{well}.CSV')
+            well_df = pd.read_csv(iteration_folder / f'OW2P-RT.WELL.{well}.CSV')
             well_df.columns = [col.strip() for col in well_df.columns]
             well_df = well_df.iloc[1:-1]
             target = well_df['WOPR (M3/DAY)']
@@ -69,9 +69,11 @@ def create_dataset(data_folder: Path):
 
 
 def _well_name(n: int) -> str:
+    if n == 0:
+        return 'P3'
     if n == 9:
-        return '9G'
-    return str(n)
+        return 'WELL9G'
+    return f'WELL{n}'
 
 
 if __name__ == '__main__':
