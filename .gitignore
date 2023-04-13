@@ -6,3 +6,4 @@ tmp/
 data/
 figures/
 catboost_info/
+wandb/
